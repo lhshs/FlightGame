@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import GameCanvas from './components/GameCanvas.tsx';
-import MainMenu from './components/MainMenu.tsx';
-import { generateMissionBriefing } from './services/geminiService.ts';
-import { GameState, MissionBriefing, Difficulty } from './types.ts';
+import GameCanvas from './components/GameCanvas';
+import MainMenu from './components/MainMenu';
+import { generateMissionBriefing } from './services/geminiService';
+import { GameState, MissionBriefing, Difficulty } from './types';
 import { Volume2, VolumeX } from 'lucide-react';
-import { DIFFICULTY_SETTINGS } from './constants.ts';
-import { soundService } from './services/soundService.ts';
+import { DIFFICULTY_SETTINGS } from './constants';
+import { soundService } from './services/soundService';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(GameState.LOADING_MISSION);
@@ -24,9 +24,8 @@ const App: React.FC = () => {
       const mission = await generateMissionBriefing();
       setBriefing(mission);
     } catch (error) {
-      console.error("Mission loading failed, proceeding with fallback:", error);
+      console.error("Mission loading failed:", error);
     } finally {
-      // 로딩이 성공하든 실패하든(fallback 사용) 메뉴로 이동하도록 보장
       setGameState(GameState.MENU);
     }
   };
@@ -92,7 +91,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Game Container */}
       <div className="relative z-0 shadow-2xl w-full max-w-[800px]">
         <GameCanvas 
             gameState={gameState} 
@@ -102,7 +100,6 @@ const App: React.FC = () => {
             difficulty={difficulty}
         />
 
-        {/* Menu Overlay */}
         {(gameState === GameState.MENU || gameState === GameState.LOADING_MISSION) && (
             <MainMenu 
                 onStart={startGame} 
@@ -113,19 +110,18 @@ const App: React.FC = () => {
             />
         )}
 
-        {/* Game Over Overlay */}
         {gameState === GameState.GAME_OVER && (
              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 backdrop-blur-sm">
                 <div className="text-center p-8 border-y-4 border-red-600 bg-black/50 w-full animate-in fade-in zoom-in duration-300">
                     <h2 className="text-5xl md:text-7xl font-display font-bold text-red-500 mb-2 tracking-tighter drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">MISSION FAILED</h2>
-                    <p className="text-slate-300 text-lg mb-6">Your aircraft has been destroyed in {DIFFICULTY_SETTINGS[difficulty].label} mode.</p>
+                    <p className="text-slate-300 text-lg mb-6">Your aircraft has been destroyed.</p>
                     <div className="mb-8">
                         <span className="text-slate-500 text-sm uppercase block mb-1 tracking-widest">Final Score</span>
                         <span className="text-4xl font-mono text-yellow-400 font-bold">{score.toLocaleString()}</span>
                     </div>
                     <button 
                         onClick={restartGame}
-                        className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded text-lg uppercase tracking-widest transition-all hover:scale-105 shadow-[0_0_20px_rgba(220,38,38,0.5)]"
+                        className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded text-lg uppercase tracking-widest transition-all hover:scale-105"
                     >
                         Re-Deploy
                     </button>
@@ -134,7 +130,6 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-4 text-slate-600 text-[10px] font-mono z-10 flex gap-4 uppercase tracking-widest">
         <span>AI Wingman Active</span>
         <span>•</span>

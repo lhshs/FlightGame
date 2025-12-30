@@ -1,10 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { MissionBriefing } from "../types.ts";
+import { MissionBriefing } from "../types";
 
 export const generateMissionBriefing = async (): Promise<MissionBriefing> => {
   try {
-    // process.env.API_KEY 접근 시 발생할 수 있는 에러 방지를 위해 함수 내부에서 초기화
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // process 객체 존재 여부 확인 (Vercel/Browser 환경 대응)
+    const key = typeof process !== 'undefined' ? process.env.API_KEY : (window as any).process?.env?.API_KEY;
+    
+    if (!key) {
+        console.warn("API Key not found, using fallback mission.");
+        throw new Error("API_KEY_MISSING");
+    }
+
+    const ai = new GoogleGenAI({ apiKey: key });
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -14,10 +21,10 @@ export const generateMissionBriefing = async (): Promise<MissionBriefing> => {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            name: { type: Type.STRING, description: "The name of the mission, e.g., 'Operation Red Sky'" },
-            objective: { type: Type.STRING, description: "One sentence objective, e.g., 'Destroy the incoming asteroid fleet.'" },
-            pilotCallsign: { type: Type.STRING, description: "A cool callsign for the player, e.g., 'Viper One'" },
-            theme: { type: Type.STRING, enum: ['scifi', 'modern', 'retro'], description: "The visual theme vibe of the mission text" }
+            name: { type: Type.STRING },
+            objective: { type: Type.STRING },
+            pilotCallsign: { type: Type.STRING },
+            theme: { type: Type.STRING, enum: ['scifi', 'modern', 'retro'] }
           },
           required: ["name", "objective", "pilotCallsign", "theme"]
         }
@@ -25,12 +32,11 @@ export const generateMissionBriefing = async (): Promise<MissionBriefing> => {
     });
 
     const text = response.text;
-    if (!text) throw new Error("No response from AI");
+    if (!text) throw new Error("No response");
     
     return JSON.parse(text) as MissionBriefing;
   } catch (error) {
-    console.error("Failed to generate mission:", error);
-    // API 호출 실패 시 즉시 반환될 수 있는 예비 미션 데이터
+    console.error("Gemini Error:", error);
     return {
       name: "Operation: Dark Star",
       objective: "Intercept unknown bogies approaching our airspace.",
