@@ -1,13 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { MissionBriefing } from "../types";
-
-// Initialize Gemini AI
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+import { MissionBriefing } from "../types.ts";
 
 export const generateMissionBriefing = async (): Promise<MissionBriefing> => {
   try {
+    // process.env.API_KEY 접근 시 발생할 수 있는 에러 방지를 위해 함수 내부에서 초기화
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: "Generate a cool, arcade-style mission briefing for a sci-fi plane shooter game.",
       config: {
         responseMimeType: "application/json",
@@ -30,12 +30,12 @@ export const generateMissionBriefing = async (): Promise<MissionBriefing> => {
     return JSON.parse(text) as MissionBriefing;
   } catch (error) {
     console.error("Failed to generate mission:", error);
-    // Fallback if API fails
+    // API 호출 실패 시 즉시 반환될 수 있는 예비 미션 데이터
     return {
-      name: "Operation: Fallback",
-      objective: "Defend the sector from unknown hostiles.",
-      pilotCallsign: "Rookie",
-      theme: "modern"
+      name: "Operation: Dark Star",
+      objective: "Intercept unknown bogies approaching our airspace.",
+      pilotCallsign: "Raven",
+      theme: "scifi"
     };
   }
 };

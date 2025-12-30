@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import GameCanvas from './components/GameCanvas';
-import MainMenu from './components/MainMenu';
-import { generateMissionBriefing } from './services/geminiService';
-import { GameState, MissionBriefing, Difficulty } from './types';
+import GameCanvas from './components/GameCanvas.tsx';
+import MainMenu from './components/MainMenu.tsx';
+import { generateMissionBriefing } from './services/geminiService.ts';
+import { GameState, MissionBriefing, Difficulty } from './types.ts';
 import { Volume2, VolumeX } from 'lucide-react';
-import { DIFFICULTY_SETTINGS } from './constants';
-import { soundService } from './services/soundService';
+import { DIFFICULTY_SETTINGS } from './constants.ts';
+import { soundService } from './services/soundService.ts';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(GameState.LOADING_MISSION);
@@ -19,14 +19,19 @@ const App: React.FC = () => {
   }, []);
 
   const loadMission = async () => {
-    setGameState(GameState.LOADING_MISSION);
-    const mission = await generateMissionBriefing();
-    setBriefing(mission);
-    setGameState(GameState.MENU);
+    try {
+      setGameState(GameState.LOADING_MISSION);
+      const mission = await generateMissionBriefing();
+      setBriefing(mission);
+    } catch (error) {
+      console.error("Mission loading failed, proceeding with fallback:", error);
+    } finally {
+      // 로딩이 성공하든 실패하든(fallback 사용) 메뉴로 이동하도록 보장
+      setGameState(GameState.MENU);
+    }
   };
 
   const startGame = () => {
-    // Crucial: Call init() on user click to unlock AudioContext
     soundService.init().then(() => {
       setGameState(GameState.PLAYING);
       setScore(0);
@@ -48,7 +53,6 @@ const App: React.FC = () => {
   const toggleSound = () => {
     const nextState = !soundEnabled;
     setSoundEnabled(nextState);
-    // Direct call within click handler for browser policy
     soundService.setEnabled(nextState);
   };
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { MissionBriefing, Difficulty } from '../types';
+import { MissionBriefing, Difficulty } from '../types.ts';
 import { Plane, Skull, Crosshair, ShieldCheck } from 'lucide-react';
-import { DIFFICULTY_SETTINGS } from '../constants';
+import { DIFFICULTY_SETTINGS } from '../constants.ts';
 
 interface MainMenuProps {
   onStart: () => void;
@@ -47,7 +47,6 @@ const MainMenu: React.FC<MainMenuProps> = ({
                       "{briefing.objective}"
                   </p>
                   
-                  {/* Difficulty Selection */}
                   <div className="border-t border-slate-700 pt-4">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-3 font-bold">Select Difficulty Level</p>
                     <div className="grid grid-cols-2 gap-2">

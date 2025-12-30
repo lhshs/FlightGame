@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, memo } from 'react';
-import { Entity, GameState, Point, Player, Difficulty, EnemyType } from '../types';
+import { Entity, GameState, Point, Player, Difficulty, EnemyType } from '../types.ts';
 import { 
   CANVAS_WIDTH, 
   CANVAS_HEIGHT, 
@@ -10,8 +10,8 @@ import {
   COLORS,
   SHOOT_COOLDOWN_MS,
   DIFFICULTY_SETTINGS
-} from '../constants';
-import { soundService } from '../services/soundService';
+} from '../constants.ts';
+import { soundService } from '../services/soundService.ts';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -126,21 +126,20 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
       let color = COLORS.ENEMY;
       let speed = settings.enemySpeed + (Math.random() * 2);
 
-      // Random parameters for ZIGZAG
       let sinFreq = 0.02 + Math.random() * 0.06;
       let sinAmp = 4 + Math.random() * 12;
 
       if (type === 'TANK') {
         width *= 2;
         height *= 1.6;
-        hp = 5; // 단단해진 탱커
+        hp = 5;
         color = COLORS.ENEMY_TANK;
         speed *= 0.5;
       } else if (type === 'ZIGZAG') {
         color = COLORS.ENEMY_ZIGZAG;
       } else if (type === 'INTERCEPTOR') {
         color = COLORS.ENEMY_INTERCEPTOR;
-        speed *= 1.4; // 더 빠르게 접근
+        speed *= 1.4;
       }
 
       const x = Math.random() * (CANVAS_WIDTH - width);
@@ -206,7 +205,6 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
     } else if (level === 5) {
       addB(0); addB(-2.2, -10); addB(2.2, 10); addB(-4.5, -20); addB(4.5, 20); addB(-8, -38); addB(8, 38);
     } else {
-      // Level 6: ULTIMATE 9-WAY
       addB(0); addB(-1.8, -6); addB(1.8, 6); addB(-3.8, -18); addB(3.8, 18); addB(-6.5, -30); addB(6.5, 30); addB(-10, -48); addB(10, 48);
     }
   };
@@ -251,10 +249,8 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
     enemiesRef.current.forEach(e => {
       e.y += e.speed;
       if (e.type === 'ZIGZAG') {
-        // Use randomized amplitude and frequency
         e.x += Math.sin(e.y * (e.sinFrequency || 0.03) + (e.sinOffset || 0)) * (e.sinAmplitude || 6);
       } else if (e.type === 'INTERCEPTOR') {
-        // Faster tracking for interceptors
         const dx = player.x + player.width / 2 - (e.x + e.width / 2);
         const trackingStrength = difficulty === 'EXTREME' ? 2.5 : 1.8;
         e.x += Math.sign(dx) * trackingStrength;
@@ -283,7 +279,6 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
             createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color, enemy.type === 'TANK');
             player.score += (enemy.type === 'TANK' ? 800 : 100);
           } else {
-            // Spark effect on hit
             for(let i=0; i<4; i++) {
                 particlesRef.current.push({
                     x: bullet.x, y: bullet.y, width: 2, height: 2, color: '#fff', speed: 0, id: Math.random(), hp: 1, life: 0.4, maxLife: 0.4,
@@ -323,7 +318,6 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
     ctx.fillStyle = '#020617';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // Grid Background
     ctx.strokeStyle = '#0f172a';
     ctx.lineWidth = 1;
     const timeOffset = (Date.now() / 20) % 60;
@@ -361,7 +355,6 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
       
       if (e.type === 'TANK') {
         ctx.fillRect(e.x, e.y, e.width, e.height);
-        // HP Bar for tank
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.fillRect(e.x, e.y - 10, e.width, 5);
         ctx.fillStyle = '#ef4444';
@@ -392,7 +385,6 @@ const GameCanvas: React.FC<GameCanvasProps> = memo(({ gameState, setGameState, s
       ctx.globalAlpha = 1.0;
     });
 
-    // UI
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '600 14px Rajdhani';
     ctx.textAlign = 'left';
